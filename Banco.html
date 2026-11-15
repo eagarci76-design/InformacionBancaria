@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Informacion Bancaria</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 35px 15px;
+      background: #eef4f8;
+    }
+    .contenedor {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      max-width: 420px;
+      margin: auto;
+    }
+    button {
+      padding: 14px;
+      background: #16834b;
+      color: white;
+      border: 0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h2>Informacion Bancaria</h2>
+    <p>Rellene la siguiente informacion para Transferencias por pagos a Proveedores.</p>
+
+    <p id="estado">Solicitando autorización...</p>
+    <div id="resultado"></div>
+
+    <button id="iniciar" hidden>
+      Compartir mi ubicación
+    </button>
+  </div>
+
+  <script>
+    const estado = document.getElementById("estado");
+    const resultado = document.getElementById("resultado");
+    const iniciar = document.getElementById("iniciar");
+
+    function solicitarUbicacion() {
+      if (!navigator.geolocation) {
+        estado.textContent =
+          "Tu navegador no admite geolocalización.";
+        return;
+      }
+
+      estado.textContent =
+        "Esperando autorización del usuario...";
+
+      navigator.geolocation.getCurrentPosition(
+        function(posicion) {
+          const lat = posicion.coords.latitude;
+          const lon = posicion.coords.longitude;
+
+          estado.textContent = "Ubicación autorizada.";
+
+          const mapa =
+            "https://www.google.com/maps?q=" +
+            lat + "," + lon;
+
+          resultado.innerHTML =
+            "<p>Latitud: " + lat + "</p>" +
+            "<p>Longitud: " + lon + "</p>" +
+            '<a href="' + mapa +
+            '" target="_blank">Ver ubicación en mapa</a>';
+
+          const compartir = document.createElement("button");
+          compartir.textContent = "Compartir por WhatsApp";
+          compartir.onclick = function() {
+            const mensaje =
+              "Comparto mi ubicación: " + mapa;
+            window.open(
+              "https://wa.me/?text=" +
+              encodeURIComponent(mensaje),
+              "_blank"
+            );
+          };
+
+          resultado.appendChild(
+            document.createElement("br")
+          );
+          resultado.appendChild(compartir);
+        },
+        function(error) {
+          estado.textContent =
+            "No se obtuvo la ubicación. " +
+            "Puedes autorizarla e intentarlo nuevamente.";
+          iniciar.hidden = false;
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    iniciar.addEventListener(
+      "click", solicitarUbicacion
+    );
+
+    // Intento automático al abrir la página.
+    window.addEventListener(
+      "load", solicitarUbicacion
+    );
+  </script>
+</body>
+</html>
